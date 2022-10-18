@@ -2,8 +2,25 @@
 
 import time
 import simple_colors
-from iter_genr import FirstHwPoint, flat_generator, unpack_list_with_yield,\
-    nested_list, deep_nested_list
+from iter_genr import FlatIterator, flat_generator, unpack_list_with_yield
+
+nested_list = [
+    ['a', 'b', 'c'],
+    ['d', 'e', 'f', 'h', False],
+    [1, 2, None],
+]
+
+deep_nested_list = [
+    [['a31', 'a32'], 'a', 'b', 'c',
+     ['c31', 'c32',
+      ['c41',
+       ['c51',
+        ['c61', 'c62',
+         ['c71', ['c81']]
+         ], 'c52'], 'c42']]],
+    ['d', 'e', 'f', 'h', False],
+    [1, 2, None],
+]
 
 if __name__ == '__main__':
 
@@ -17,16 +34,9 @@ if __name__ == '__main__':
     print(simple_colors.black(s, ['bold']))
     print('-' * len(s))
     print('Результатный плоский список:')
-    my_list = FirstHwPoint()
-    for item in my_list:
-        print(item.common_list, end=' ')
-    print()
-    print()
-    time.sleep(2)
-
-    print('Результат list comprehension:')
-    my_list_2 = FirstHwPoint()
-    flat_list = [item.common_list for item in my_list_2]
+    flat_list = []
+    for item in FlatIterator(nested_list):
+        flat_list.append(item)
     print(flat_list)
     print()
     time.sleep(2)
@@ -35,7 +45,7 @@ if __name__ == '__main__':
     print(simple_colors.black(s, ['bold']))
     print('-' * len(s))
     print('Результатный плоский список:')
-    for item in flat_generator():
+    for item in flat_generator(nested_list):
         print(item, end=' ')
     print()
     print()
@@ -45,10 +55,10 @@ if __name__ == '__main__':
         'вложенности'
     print(simple_colors.black(s, ['bold']))
     print('-'*len(s))
-    print('С использованием yield:')
     print('Исходный "неограниченный" список:')
     print(deep_nested_list)
-    for item in unpack_list_with_yield():
+    print()
+    for item in unpack_list_with_yield(deep_nested_list):
         print(item, end=' ')
     print()
     print()

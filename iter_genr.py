@@ -1,28 +1,9 @@
-nested_list = [
-    ['a', 'b', 'c'],
-    ['d', 'e', 'f', 'h', False],
-    [1, 2, None],
-]
-
-deep_nested_list = [
-    [['a31', 'a32'], 'a', 'b', 'c',
-     ['c31', 'c32',
-      ['c41',
-       ['c51',
-        ['c61', 'c62',
-         ['c71']
-         ], 'c52'], 'c42']]],
-    ['d', 'e', 'f', 'h', False],
-    [1, 2, None],
-]
-
 depth = 1
-fl = 0
-help_list = []
+most_depth = 0
 flat_list = []
 
 
-def flat_generator():
+def flat_generator(some_list):
     '''
     Функция-генератор плоского списка из двухмерного
 
@@ -32,12 +13,12 @@ def flat_generator():
     j = 0
     while True:
         try:
-            current_item = nested_list[j][i]
+            current_item = some_list[j][i]
         except IndexError:
             i = 0
             j += 1
             try:
-                current_item = nested_list[j][i]
+                current_item = some_list[j][i]
             except IndexError:
                 break
         yield current_item
@@ -52,34 +33,30 @@ def unpack_unlim_list(deep_list: list):
     вызовом n уменьшается пока не станет =1
     :return: количество уровней исходного списка и результатный плоский список
     '''
-    global depth
-    global fl
-    global help_list
-    global flat_list
+    global depth # переменная для хранения текущей глубины вложенности списка
+    global most_depth # переменная для хранания наибольшей глубины вложенности
+    global flat_list # переменная для хранения результатного плоского списка
 
     for element in deep_list:
         if type(element) == list:
             depth += 1
-            fl += 1
             unpack_unlim_list(element)
             continue
         else:
             flat_list.append(element)
-            if fl > 0:
-                fl = 0
-                help_list.append(depth)
-
+            if depth > most_depth:
+                most_depth = depth
             continue
     depth -= 1
-    return (max(help_list), flat_list)
+    return (most_depth, flat_list)
 
 
-def unpack_list_with_yield():
+def unpack_list_with_yield(some_deep_list):
     '''
     Функция-генератор списка
     :return: None
     '''
-    depth, middle_list = unpack_unlim_list(deep_nested_list)
+    depth, middle_list = unpack_unlim_list(some_deep_list)
     print('Глубина исходного списка: ', depth, 'уровней')
     print('Результатный плоский список:')
     for element in middle_list:
@@ -87,26 +64,28 @@ def unpack_list_with_yield():
     return
 
 
-class FirstHwPoint():
+class FlatIterator():
 
-    def __init__(self):
-        self.list_index = 0
-        self.element_index = 0
+    def __init__(self, some_list):
+        self.main_list = some_list
 
     def __iter__(self):
+        self.main_list_cursor = 0  # курсор основного списка
+        self.nested_list_cursor = 0  # курсор вложенного списка
         return self
 
     def __next__(self):
         try:
-            self.common_list = nested_list[self.list_index][
-                self.element_index]
+            caught_element= self.main_list[self.main_list_cursor][
+                self.nested_list_cursor]
+            self.nested_list_cursor += 1
         except IndexError:
-            self.element_index = 0
-            self.list_index += 1
+            self.nested_list_cursor = 0
+            self.main_list_cursor += 1
             try:
-                self.common_list = nested_list[self.list_index][
-                    self.element_index]
+                caught_element = self.main_list[self.main_list_cursor][
+                    self.nested_list_cursor]
             except IndexError:
                 raise StopIteration
-        self.element_index += 1
-        return self
+
+        return caught_element
